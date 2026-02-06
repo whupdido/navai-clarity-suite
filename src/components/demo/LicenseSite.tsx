@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { SimulatedSiteProps, GuidanceStep } from '@/lib/types';
 
 export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: SimulatedSiteProps) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -20,7 +20,12 @@ export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: Si
   });
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // Map dashed field names (data-navai) to camelCase state keys
+    const stateKey = field.includes('-')
+      ? field.replace(/-([a-z])/g, (_, c) => c.toUpperCase())
+      : field;
+
+    setFormData(prev => ({ ...prev, [stateKey]: value }));
     onAction(`[data-navai="${field}"]`, true);
   };
 
@@ -29,20 +34,22 @@ export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: Si
   return (
     <div className="min-h-full bg-background p-6">
       {/* Fake government header */}
-      <header className="bg-secondary rounded-lg p-4 mb-6">
+      <header className="bright-cyan-bg rounded-lg p-4 mb-6 navai-distraction">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/30 rounded-full" />
+            <div className="w-10 h-10 bright-magenta-bg rounded-full flex items-center justify-center">
+              <div className="animated-spinner" aria-hidden />
+            </div>
             <div>
               <h1 className="font-bold text-lg">State Department of Motor Vehicles</h1>
-              <p className="text-xs text-muted-foreground">Driver License Services Portal</p>
+              <p className="text-xs opacity-70">Driver License Services Portal</p>
             </div>
           </div>
-          <nav className={`hidden md:flex gap-4 text-sm ${isCalm ? 'navai-distraction' : ''}`}>
-            <span className="text-muted-foreground cursor-pointer hover:text-foreground">Home</span>
-            <span className="text-muted-foreground cursor-pointer hover:text-foreground">Vehicle Registration</span>
-            <span className="text-muted-foreground cursor-pointer hover:text-foreground">ID Cards</span>
-            <span className="text-muted-foreground cursor-pointer hover:text-foreground">Contact</span>
+          <nav className={`hidden md:flex gap-4 text-sm navai-distraction`}>
+            <span className="bright-blue-text cursor-pointer hover:opacity-80 font-medium">Home</span>
+            <span className="bright-purple-text cursor-pointer hover:opacity-80 font-medium">Vehicle Registration</span>
+            <span className="bright-pink-text cursor-pointer hover:opacity-80 font-medium">ID Cards</span>
+            <span className="bright-orange-text cursor-pointer hover:opacity-80 font-medium">Contact</span>
           </nav>
         </div>
       </header>
@@ -50,21 +57,25 @@ export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: Si
       <div className="flex gap-6">
         {/* Sidebar - distraction */}
         {!isFocusAssist && (
-          <aside className={`hidden lg:block w-48 shrink-0 ${isCalm ? 'navai-distraction' : ''}`}>
-            <div className="bg-secondary rounded-lg p-4 space-y-3">
+          <aside className={`hidden lg:block w-48 shrink-0`}>
+            <div className="bright-blue-bg rounded-lg p-4 space-y-3 navai-distraction text-white">
               <h3 className="font-semibold text-sm">Quick Links</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="cursor-pointer hover:text-foreground">Renew License</li>
-                <li className="cursor-pointer hover:text-foreground">Replace Lost ID</li>
-                <li className="cursor-pointer hover:text-foreground">Update Address</li>
-                <li className="cursor-pointer hover:text-foreground">Check Status</li>
-                <li className="cursor-pointer hover:text-foreground">Schedule Test</li>
+              <ul className="space-y-2 text-sm opacity-90">
+                <li className="cursor-pointer hover:opacity-100">Renew License</li>
+                <li className="cursor-pointer hover:opacity-100">Replace Lost ID</li>
+                <li className="cursor-pointer hover:opacity-100">Update Address</li>
+                <li className="cursor-pointer hover:opacity-100">Check Status</li>
+                <li className="cursor-pointer hover:opacity-100">Schedule Test</li>
               </ul>
             </div>
-            <div className="bg-secondary rounded-lg p-4 mt-4">
+            <div className={`bright-pink-bg rounded-lg p-4 mt-4 promo-card navai-distraction text-white`}>
               <h3 className="font-semibold text-sm mb-2">Office Hours</h3>
-              <p className="text-xs text-muted-foreground">Mon-Fri: 8AM - 5PM</p>
-              <p className="text-xs text-muted-foreground">Sat: 9AM - 1PM</p>
+              <p className="text-xs opacity-90">Mon-Fri: 8AM - 5PM</p>
+              <p className="text-xs opacity-90">Sat: 9AM - 1PM</p>
+              <div className="mt-3 flex items-center gap-2">
+                <div className="floating-bubble navai-distraction" aria-hidden />
+                <div className="text-xs opacity-90">Live chat available</div>
+              </div>
             </div>
           </aside>
         )}
@@ -72,27 +83,32 @@ export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: Si
         {/* Main content */}
         <main className="flex-1 max-w-2xl">
           {/* Step indicator */}
-          <div className={`mb-6 ${isCalm ? 'navai-distraction' : ''}`}>
-            <div className="flex items-center gap-2 text-sm">
-              <span className={step >= 1 ? 'text-primary font-medium' : 'text-muted-foreground'}>1. Personal Info</span>
-              <span className="text-muted-foreground">→</span>
-              <span className={step >= 2 ? 'text-primary font-medium' : 'text-muted-foreground'}>2. Address</span>
-              <span className="text-muted-foreground">→</span>
-              <span className={step >= 3 ? 'text-primary font-medium' : 'text-muted-foreground'}>3. Documents</span>
+          <div className={`mb-6 p-3 bright-purple-bg rounded-lg navai-distraction text-white`}>
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <span className={step >= 1 ? 'brightness-150' : 'opacity-60'}>1. Personal Info</span>
+              <span className="opacity-75">→</span>
+              <span className={step >= 2 ? 'brightness-150' : 'opacity-60'}>2. Address</span>
+              <span className="opacity-75">→</span>
+              <span className={step >= 3 ? 'brightness-150' : 'opacity-60'}>3. Documents</span>
             </div>
           </div>
 
           {/* Start button (before step 1) */}
-          {step === 1 && !formData.firstName && (
+          {step === 0 && (
             <div className="text-center py-12">
-              <h2 className="text-2xl font-semibold mb-4">Driver License Application</h2>
+              <h2 className="text-4xl font-bold mb-4 bright-magenta-text navai-distraction">Driver License Application</h2>
               <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                 Apply for a new driver's license or permit. You'll need your personal information and a valid ID.
               </p>
+              <div className="mb-6 promo-marquee navai-distraction">
+                <span className="marquee-track text-sm bright-orange-text font-semibold">New: Expedited processing • Reduced wait times • Mobile-friendly forms</span>
+              </div>
+
               <Button
                 data-navai="start-application"
-                className="btn-pill-primary"
+                className="btn-pill-primary bright-orange-bg text-black hover:opacity-90 navai-distraction"
                 onClick={() => {
+                  setStep(1);
                   onAction('[data-navai="start-application"]', true);
                 }}
               >
@@ -101,12 +117,15 @@ export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: Si
             </div>
           )}
 
-          {/* Step 1: Personal Info */}
-          {step === 1 && formData.firstName !== '' && (
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h2 className="text-xl font-semibold mb-6">Personal Information</h2>
+          {step === 1 && (
+            <div className="bg-card border-2 bright-teal-border rounded-xl p-6 navai-distraction">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold bright-teal-text">Personal Information</h2>
+                <span className="animated-badge bright-teal-bg text-black navai-distraction">Step 1/3</span>
+              </div>
               
               <div className="space-y-4">
+                <div className="shimmer-line navai-distraction" />
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="first-name">First Name *</Label>
@@ -143,6 +162,7 @@ export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: Si
                     />
                   </div>
                 </div>
+                <div className="shimmer-line navai-distraction" />
 
                 <div className="flex justify-end pt-4">
                   <Button
@@ -162,10 +182,14 @@ export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: Si
 
           {/* Step 2: Address */}
           {step === 2 && (
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h2 className="text-xl font-semibold mb-6">Address Information</h2>
+            <div className="bg-card border-2 bright-orange-border rounded-xl p-6 navai-distraction">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold bright-orange-text">Address Information</h2>
+                <span className="animated-badge bright-orange-bg text-black navai-distraction">Step 2/3</span>
+              </div>
               
               <div className="space-y-4">
+                <div className="shimmer-line navai-distraction" />
                 <div>
                   <Label htmlFor="address">Street Address *</Label>
                   <Input
@@ -240,16 +264,20 @@ export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: Si
 
           {/* Step 3: Documents */}
           {step === 3 && (
-            <div className="bg-card border border-border rounded-xl p-6">
-              <h2 className="text-xl font-semibold mb-6">Upload Documents</h2>
+            <div className="bg-card border-2 bright-red-border rounded-xl p-6 navai-distraction">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold bright-red-text">Upload Documents</h2>
+                <span className="animated-badge bright-red-bg text-white navai-distraction">Step 3/3</span>
+              </div>
               
               <div className="space-y-6">
+                <div className="shimmer-line navai-distraction" />
                 <div>
                   <Label>Proof of Identity *</Label>
                   <div 
                     data-navai="upload-id"
-                    className={`mt-2 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:bg-secondary/50 transition-colors ${
-                      isTarget('upload-id') ? 'border-primary bg-primary/5' : 'border-border'
+                    className={`mt-2 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer hover:brightness-110 transition-all glow-box navai-distraction bright-red-border ${
+                      isTarget('upload-id') ? 'bright-red-bg text-white' : ''
                     } ${formData.uploadedFile ? 'bg-primary/10' : ''}`}
                     onClick={() => {
                       setFormData(prev => ({ ...prev, uploadedFile: true }));
@@ -308,14 +336,14 @@ export function LicenseSite({ onAction, currentStep, isCalm, isFocusAssist }: Si
 
           {/* Distracting notices */}
           {!isFocusAssist && (
-            <div className={`mt-6 space-y-4 ${isCalm ? 'navai-distraction' : ''}`}>
-              <div className="bg-muted rounded-lg p-4">
+            <div className={`mt-6 space-y-4 navai-distraction`}>
+              <div className="bg-muted rounded-lg p-4 top-notification">
                 <h4 className="font-medium text-sm mb-1">Important Notice</h4>
                 <p className="text-xs text-muted-foreground">
                   Processing times may vary. Most applications are processed within 2-4 weeks.
                 </p>
               </div>
-              <div className="bg-muted rounded-lg p-4">
+              <div className="bg-muted rounded-lg p-4 promo-card">
                 <h4 className="font-medium text-sm mb-1">Need Help?</h4>
                 <p className="text-xs text-muted-foreground">
                   Contact our support line at 1-800-555-0123 or visit your local DMV office.

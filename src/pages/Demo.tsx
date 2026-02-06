@@ -136,15 +136,32 @@ const Demo = () => {
   }, [taskFlow, currentStepIndex]);
 
   const handleAction = useCallback((selector: string, causedChange: boolean) => {
-    if (!currentStep) return;
-    
-    const isOnTarget = selector === currentStep.targetSelector;
     const rect = canvasRef.current?.getBoundingClientRect();
     const x = rect ? rect.left + rect.width / 2 : 0;
     const y = rect ? rect.top + rect.height / 2 : 0;
-    
-    recordClick(x, y, isOnTarget, causedChange);
-    
+
+    const isStartTarget = taskFlow && taskFlow.steps[0]?.targetSelector === selector;
+    const isOnTarget = selector === currentStep?.targetSelector;
+
+    // Record the interaction regardless of whether the guide is active yet.
+    recordClick(x, y, Boolean(isOnTarget || isStartTarget), causedChange);
+
+    // If the guide isn't active yet but the user clicked the first-step target
+    // (e.g. the site's "Start Application" button), start the guide.
+    if (!currentStep) {
+      if (isStartTarget && causedChange) {
+        setCurrentStepIndex(0);
+        setIsActive(true);
+        setCalmMode(false);
+        setShowHint(false);
+        resetFriction();
+        toast.success('Guide started!', {
+          description: 'Follow the highlighted steps to complete your goal.',
+        });
+      }
+      return;
+    }
+
     if (isOnTarget && causedChange) {
       // Advance to next step
       if (taskFlow && currentStepIndex < taskFlow.steps.length - 1) {
@@ -157,7 +174,7 @@ const Demo = () => {
         });
       }
     }
-  }, [currentStep, taskFlow, currentStepIndex, recordClick]);
+  }, [currentStep, taskFlow, currentStepIndex, recordClick, resetFriction]);
 
   const handleUpdatePreference = (key: keyof typeof preferences, value: boolean) => {
     const newPrefs = { ...preferences, [key]: value };
@@ -183,7 +200,7 @@ const Demo = () => {
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={`min-h-screen flex flex-col ${preferences.largeText ? 'text-size-large' : ''}`}>
+    <div className={`min-h-screen flex flex-col ${preferences.largeText ? 'text-size-large' : ''} ${calmMode ? 'calm-mode' : ''}`}>
       {/* Header */}
       <header className="h-14 border-b border-border flex items-center px-4 gap-4 shrink-0">
         <Link 
